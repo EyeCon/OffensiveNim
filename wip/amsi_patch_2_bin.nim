@@ -2,7 +2,7 @@
     Reference https://modexp.wordpress.com/2019/06/03/disable-amsi-wldp-dotnet/#amsi_patch_C
 
     So this is an interesting problem: Nim doesn't preserve the order of the functions you define when it generates their C code counterparts.
-    Because were doing some memory patching here, thats sorta needed. You could use the emit pragma for this (??) but then you'd have to deal with the missing symbols.
+    Because we're doing some memory patching here, that's sorta needed. You could use the emit pragma for this (??) but then you'd have to deal with the missing symbols.
 
     Probably better off using another patching method.
 

@@ -2,7 +2,7 @@
     Author: Marcello Salvati, Twitter: @byt3bl33d3r
     License: BSD 3-Clause
 
-    Example of using inline assembly to execute shellcode. This is cool cause it avoids using Windows API's to allocate a region of RWX memory.
+    Example of using inline assembly to execute shellcode. This is cool cause it avoids using Windows APIs to allocate a region of RWX memory.
 
     References:
         - https://www.ired.team/offensive-security/code-injection-process-injection/executing-shellcode-with-inline-assembly-in-c-c++

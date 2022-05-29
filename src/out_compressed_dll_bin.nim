@@ -2,7 +2,7 @@
     Author: Marcello Salvati, Twitter: @byt3bl33d3r
     License: BSD 3-Clause
 
-    Compresses, Base-64 encodes and outputs PowerShell code to load a managed dll in memory. Port of the orignal PowerSploit script to Nim.
+    Compresses, Base-64 encodes and outputs PowerShell code to load a managed dll in memory. Port of the original PowerSploit script to Nim.
 
     Requires the zippy library ("nimble install zippy")
 

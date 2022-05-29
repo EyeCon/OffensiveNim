@@ -5,4 +5,4 @@
 
 import winim/com
 
-MessageBox(0, "Hello, world !", "Nim is Powerful", 0)
+MessageBox(0, "Hello, world!", "Nim is Powerful", 0)

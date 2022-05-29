@@ -5,7 +5,7 @@
 
     This (ab)uses Window's implementation of Fork() and acquires a handle to a remote process using the PROCESS_CREATE_PROCESS access right potentially allowing to evade EDR detectons.
 
-    This example uses MiniDumpWriteDump() to dump the forked processes memory after acquiring it's handle.
+    This example uses MiniDumpWriteDump() to dump the forked processes memory after acquiring its handle.
     See the blogpost in the references below for a full write-up.
 
     References:
