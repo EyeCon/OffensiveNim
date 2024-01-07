@@ -9,26 +9,29 @@ My experiments in weaponizing [Nim](https://nim-lang.org/) for implant developme
 ## Table of Contents
 
 - [OffensiveNim](#offensivenim)
-  * [Why Nim?](#why-nim)
-  * [Examples in this repo](#examples-in-this-repo)
-  * [Compiling the examples](#compiling-the-examples-in-this-repo)
-    + [Easy Way (Recommended)](#easy-way-recommended)
-    + [Hard Way (For the Bold)](#hard-way-for-the-bold)
-  * [Cross Compiling](#cross-compiling)
-  * [Interfacing with C/C++](#interfacing-with-cc)
-  * [Creating Windows DLLs with an exported DllMain](#creating-windows-dlls-with-an-exported-dllmain)
-  * [Optimizing executables for size](#optimizing-executables-for-size)
-  * [Reflectively Loading Nim Executables](#reflectively-loading-nim-executables)
-  * [Executable size difference with the Winim Library](#executable-size-difference-when-using-the-winim-library-vs-without)
-  * [Opsec Considirations](#opsec-considerations)
-  * [Converting C Code to Nim](#converting-c-code-to-nim)
-  * [Language Bridges](#language-bridges)
-  * [Debugging](#debugging)
-  * [Setting up a dev environment](#setting-up-a-dev-environment)
-  * [Pitfalls I found myself falling into](#pitfalls-i-found-myself-falling-into)
-  * [Interesting Nim Libraries](#interesting-nim-libraries)
-  * [Nim for Implant Dev Links](#nim-for-implant-dev-links)
-  * [Contributors](#contributors)
+  - [Table of Contents](#table-of-contents)
+  - [Why Nim?](#why-nim)
+  - [Examples in this repo that work](#examples-in-this-repo-that-work)
+  - [Examples that are a WIP](#examples-that-are-a-wip)
+  - [Compiling the examples in this repo](#compiling-the-examples-in-this-repo)
+    - [Easy Way (Recommended)](#easy-way-recommended)
+    - [Hard way (For the bold)](#hard-way-for-the-bold)
+  - [Cross Compiling](#cross-compiling)
+  - [Interfacing with C/C++](#interfacing-with-cc)
+  - [Creating Windows DLLs with an exported `DllMain`](#creating-windows-dlls-with-an-exported-dllmain)
+    - [Creating XLLs](#creating-xlls)
+  - [Optimizing executables for size](#optimizing-executables-for-size)
+  - [Reflectively Loading Nim Executables](#reflectively-loading-nim-executables)
+  - [Executable size difference when using the Winim library vs without](#executable-size-difference-when-using-the-winim-library-vs-without)
+  - [Opsec Considerations](#opsec-considerations)
+  - [Converting C code to Nim](#converting-c-code-to-nim)
+  - [Language Bridges](#language-bridges)
+  - [Debugging](#debugging)
+  - [Setting up a dev environment](#setting-up-a-dev-environment)
+  - [Pitfalls I found myself falling into](#pitfalls-i-found-myself-falling-into)
+  - [Interesting Nim libraries](#interesting-nim-libraries)
+  - [Nim for implant dev links](#nim-for-implant-dev-links)
+  - [Contributors](#contributors)
 
 ## Why Nim?
 
@@ -59,6 +62,7 @@ My experiments in weaponizing [Nim](https://nim-lang.org/) for implant developme
 | [self_delete_bin.nim](../master/src/self_delete_bin.nim) | A way to delete a locked or current running executable on disk. Method discovered by [@jonasLyk](https://twitter.com/jonasLyk/status/1350401461985955840) |
 | [encrypt_decrypt_bin.nim](../master/src/encrypt_decrypt_bin.nim) | Encryption/Decryption using AES256 (CTR Mode) using the [Nimcrypto](https://github.com/cheatfate/nimcrypto) library |
 | [amsi_patch_bin.nim](../master/src/amsi_patch_bin.nim) | Patches AMSI out of the current process |
+| [amsi_providerpatch_bin.nim](../master/src/amsi_providerpatch_bin.nim) | Patches the AMSI Provider DLL (in this case MpOav.dll) to bypass AMSI. Published [here](https://i.blackhat.com/Asia-22/Friday-Materials/AS-22-Korkos-AMSI-and-Bypass.pdf) |
 | [etw_patch_bin.nim](../master/src/etw_patch_bin.nim) | Patches ETW out of the current process (Contributed by ) |
 | [wmiquery_bin.nim](../master/src/wmiquery_bin.nim) | Queries running processes and installed AVs using using WMI |
 | [out_compressed_dll_bin.nim](../master/src/out_compressed_dll_bin.nim) | Compresses, Base-64 encodes and outputs PowerShell code to load a managed dll in memory. Port of the orignal PowerSploit script to Nim. |
@@ -67,6 +71,7 @@ My experiments in weaponizing [Nim](https://nim-lang.org/) for implant developme
 | [shellcode_bin.nim](../master/src/shellcode_bin.nim) | Creates a suspended process and injects shellcode with `VirtualAllocEx`/`CreateRemoteThread`. Also demonstrates the usage of compile time definitions to detect arch, os etc..|
 | [shellcode_fiber.nim](../master/src/shellcode_fiber.nim) | Shellcode execution via fibers |
 | [shellcode_inline_asm_bin.nim](../master/src/shellcode_inline_asm_bin.nim) | Executes shellcode using inline assembly |
+| [ssdt_dump.nim](../master/src/ssdt_dump.nim) | Simple SSDT retrieval using runtime function table from exception directory. Technique inspired from [MDSEC](https://www.mdsec.co.uk/2022/04/resolving-system-service-numbers-using-the-exception-directory/) article |
 | [syscalls_bin.nim](../master/src/syscalls_bin.nim) | Shows how to make direct system calls |
 | [execute_powershell_bin.nim](../master/src/execute_powershell_bin.nim) | Hosts the CLR & executes PowerShell through an un-managed runspace |
 | [passfilter_lib.nim](../master/src/passfilter_lib.nim) | Log password changes to a file by (ab)using a password complexity filter |
@@ -86,6 +91,15 @@ My experiments in weaponizing [Nim](https://nim-lang.org/) for implant developme
 | [sandbox_process_bin.nim](../master/src/sandbox_process_bin.nim) | This sandboxes a process by setting it's integrity level to Untrusted and strips important tokens. This can be used to "silently disable" a PPL process (e.g. AV/EDR) |
 | [list_remote_shares.nim](../master/src/list_remote_shares.nim) | Use NetShareEnum to list the share accessible by the current user |
 | [chrome_dump_bin.nim](../master/src/chrome_dump_bin.nim) | Read and decrypt cookies from Chrome's sqlite database|
+| [suspended_thread_injection.nim](../master/src/suspended_thread_injection.nim) | Shellcode execution via suspended thread injection |
+| [dns_exfiltrate.nim](../master/src/dns_exfiltrate.nim) | Simple DNS exfiltration via TXT record queries |
+| [rsrc_section_shellcode.nim](../master/src/rsrc_section_shellcode.nim) | Execute shellcode embedded in the .rsrc section of the binary |
+| [token_steal_cmd.nim](../master/src/token_steal_cmd.nim) | Steal a token/impersonate and then run a command | 
+| [anti_analysis_isdebuggerpresent.nim](../master/src/anti_analysis_isdebuggerpresent.nim) | Simple anti-analysis that checks for a debugger | 
+| [sandbox_domain_check.nim](../master/src/sandbox_domain_check.nim) | Simple sandbox evasion technique, that checks if computer is connected to domain or not |
+| [Hook.nim](../master/src/Hook.nim) | Offensive Hooking example for MessageBoxA | 
+| [anti_debug.nim](../master/src/anti_debug.nim) | Showcasing two anti debugging techniques | 
+
 
 ## Examples that are a WIP
 
@@ -191,6 +205,31 @@ To compile:
 nim c -d=mingw --app=lib --nomain --cpu=amd64 mynim.dll
 ```
 
+### Creating XLLs
+You can make an XLL (an Excel DLL, imagine that) with an auto open function that can be used for payload delivery. The following code creates a simple for an XLL that has an auto open function and all other boilerplate code needed to compile as a link library. The POC compiles as a DLL, you can then change the extension to .xll and it will open in Excel and run the payload when double clicked:
+
+```nim
+#[
+    Compile:
+        nim c -d=mingw --app=lib --nomain --cpu=amd64 nim_xll.nim
+        
+    Will compile as a DLL, you can then just change the extension to .xll
+]#
+
+import winim/lean
+
+proc xlAutoOpen() {.stdcall, exportc, dynlib.} =
+    MessageBox(0, "Hello, world !", "Nim is Powerful", 0)
+
+proc NimMain() {.cdecl, importc.}
+
+proc DllMain(hinstDLL: HINSTANCE, fdwReason: DWORD, lpvReserved: LPVOID) : BOOL {.stdcall, exportc, dynlib.} =
+  NimMain()
+
+  return true
+```
+
+There are many other sneaky things that can be done with XLLs. See [more examples of XLL tradecraft here](https://github.com/Octoberfest7/XLL_Phishing).
 
 ## Optimizing executables for size
 
@@ -328,10 +367,8 @@ var buf: array[5, byte] = [byte 0xfc,0x48,0x81,0xe4,0xf0,0xff]
 
 ## Contributors 
 
-- [@ShitSecure](https://twitter.com/ShitSecure)
-- [@VVX7](https://twitter.com/VV_X_7)
-- [@checkymander](https://twitter.com/checkymander)
-- Kiran Patel
-- [@frknayar](https://twitter.com/frknayar)
-- [@OffenseTeacher](https://twitter.com/OffenseTeacher)
-- [@fkadibs](https://twitter.com/fkadibs)
+Virtual hug to everyone who contributed ❤️
+
+<a href="https://github.com/byt3bl33d3r/OffensiveNim/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=byt3bl33d3r/OffensiveNim" />
+</a>
